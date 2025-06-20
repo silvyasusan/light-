@@ -5,14 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Happy Birthday BunBun</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     html, body {
       width: 100vw;
       height: 100vh;
       overflow: hidden;
       background: #000;
-      touch-action: none;
       font-family: 'Segoe UI', sans-serif;
+      touch-action: none;
     }
     #room {
       position: relative;
@@ -60,11 +64,29 @@
       opacity: 1;
     }
     #celebration {
-      display: none;
+      opacity: 0;
+      pointer-events: none;
       position: absolute;
       inset: 0;
       background: url('assets/celebration-bg.png') center center / cover no-repeat;
       z-index: 10;
+      transition: opacity 2s ease-in-out;
+    }
+    #celebration.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    #celebration::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(255,255,200,0.3), transparent 70%);
+      animation: softGlow 3s ease-in-out infinite alternate;
+      z-index: 1;
+    }
+    @keyframes softGlow {
+      from { opacity: 0.2; }
+      to { opacity: 0.5; }
     }
     canvas {
       position: absolute;
@@ -104,7 +126,8 @@
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
         size: Math.random() * 3 + 1,
-        glow: Math.random() * 0.5 + 0.5
+        glow: Math.random() * 0.5 + 0.5,
+        twinkleSpeed: Math.random() * 0.02 + 0.005
       });
     }
 
@@ -113,9 +136,11 @@
       for (let p of particles) {
         p.x += p.vx;
         p.y += p.vy;
-
         if (p.x < 0 || p.x > W) p.vx *= -1;
         if (p.y < 0 || p.y > H) p.vy *= -1;
+
+        p.glow += (Math.random() - 0.5) * p.twinkleSpeed;
+        p.glow = Math.max(0.2, Math.min(p.glow, 1));
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -204,8 +229,12 @@
     window.addEventListener('touchend', stopDragging);
 
     switchEl.addEventListener('click', () => {
-      document.getElementById('room').style.display = 'none';
-      celebration.style.display = 'block';
+      celebration.classList.add('show');
+      document.getElementById('room').style.transition = 'opacity 1s';
+      document.getElementById('room').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('room').style.display = 'none';
+      }, 1500);
     });
   </script>
 </body>
